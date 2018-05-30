@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -17,6 +18,8 @@ public class Manager {
 	private static ArrayList<Album> albuns = new ArrayList<>();
 	private static ArrayList<Playlist> playlists = new ArrayList<>();
 	public static DefaultTableModel tbTdMusicas, tbMusicasPlaylist;
+	
+	private static JComboBox<String> playlistBox;
 	
 	public static Musica getMusica(int index) {
 		
@@ -51,6 +54,8 @@ public class Manager {
 	public static JComboBox<String> getAlbumBox() {
 		
 		JComboBox<String> combo = new JComboBox<>();
+		((JLabel) combo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+		
 		combo.addItem("Álbum");
 		
 		for (Album album : albuns) {
@@ -61,9 +66,57 @@ public class Manager {
 		return combo;
 	}
 	
+	public static JComboBox<String> getPlaylistBox() {
+		
+		JComboBox<String> combo = new JComboBox<>();
+		((JLabel) combo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+		
+		for (Playlist playlist : playlists) {
+			
+			combo.addItem(playlist.getNome());
+		}
+		
+		playlistBox = combo;
+		
+		return playlistBox;
+	}
+	
 	public static void newAlbum(String titulo) {
 		
 		albuns.add(new Album(titulo));
+	}
+	
+	public static void newPlaylist(String titulo) {
+		
+		playlists.add(new Playlist(titulo));
+		atualizarPlaylistBox();
+	}
+	
+	public static void removePlaylist(String titulo) {
+		
+		for (int i = 0; i < playlists.size(); i++) {
+			
+			Playlist playlist = playlists.get(i);
+			
+			if (playlist.getNome().equals(titulo)) {
+				
+				playlists.remove(playlist);
+			}
+		}
+		
+		atualizarPlaylistBox();
+	}
+	
+	private static void atualizarPlaylistBox() {
+		
+		playlistBox.removeAllItems();
+		
+		for (Playlist playlist : playlists) {
+			
+			playlistBox.addItem(playlist.getNome());
+		}
+		
+		playlistBox.setSelectedIndex(playlists.size() - 1);
 	}
 	
 	public static JScrollPane getTbTodasMusicas() {

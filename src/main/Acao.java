@@ -2,6 +2,8 @@ package main;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -56,7 +59,7 @@ public class Acao {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				int logado = confirmarLogin(edtNome.getText(), edtSenha.getText());
+				int logado = confirmarLogin(edtNome.getText(), String.valueOf(edtSenha.getPassword()));
 				
 				if (logado > -1) {
 					
@@ -191,9 +194,86 @@ public class Acao {
 		Frame frmPlaylists = new Frame("Playlists");
 		frmPlaylists.setPadding(15);
 		
-		JScrollPane scrollMusicas = Manager.getTbMusicasPlaylist("");
-		scrollMusicas.setBounds(0, 40, 1000, 250);
+		JLabel lblPlaylists = new JLabel("Playlists");
+		lblPlaylists.setBounds(0, 5, 50, 15);
 		
+		JComboBox<String> cbxPlaylists = Manager.getPlaylistBox();
+		cbxPlaylists.setBounds(65, 0, 350, 25);
+		cbxPlaylists.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				
+				Manager.atualizarTbMusicasPlaylist((String) cbxPlaylists.getSelectedItem());
+			}
+		});
+		
+		JButton btnNewPlaylist = new JButton("Nova Playlist");
+		btnNewPlaylist.setBounds(430, 0, 150, 25);
+		btnNewPlaylist.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				String titulo = JOptionPane.showInputDialog("Informe o nome da nova playlist");
+				
+				Manager.newPlaylist(titulo);
+			}
+		});
+		
+		JButton btnRemPlaylist = new JButton("Remover Playlist");
+		btnRemPlaylist.setBounds(595, 0, 150, 25);
+		btnRemPlaylist.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				Manager.removePlaylist((String) cbxPlaylists.getSelectedItem());
+			}
+		});
+		
+		JTextField edtPesquisa = new JTextField();
+		edtPesquisa.setBounds(0, 40, 960, 25);
+		edtPesquisa.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbMusicasPlaylist);
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbMusicasPlaylist);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {}
+		});
+		
+		JLabel lblInfoPesquisa = new JLabel("?");
+		lblInfoPesquisa.setBounds(985, 45, 15, 15);
+		lblInfoPesquisa.setToolTipText("<html><p>Use este campo para pesquisar suas músicas por:<br/>"
+									 + " Nome, Gênero, Artista, Album ou Duração</p></html>");
+		
+		JScrollPane scrollMusicas = Manager.getTbMusicasPlaylist("");
+		scrollMusicas.setBounds(0, 80, 1000, 250);
+		
+		JButton btnAddMusica = new JButton("Adicionar Música");
+		btnAddMusica.setBounds(0, 345, 150, 25);
+		
+		JButton btnRemMusica = new JButton("Remover Música");
+		btnRemMusica.setBounds(165, 345, 150, 25);
+		
+		frmPlaylists.add(btnNewPlaylist);
+		frmPlaylists.add(btnRemPlaylist);
+		frmPlaylists.add(btnAddMusica);
+		frmPlaylists.add(btnRemMusica);
+		frmPlaylists.add(edtPesquisa);
+		frmPlaylists.add(lblInfoPesquisa);
+		frmPlaylists.add(lblPlaylists);
+		frmPlaylists.add(cbxPlaylists);
 		frmPlaylists.add(scrollMusicas);
 		
 		frmPlaylists.setVisible(true);
@@ -223,9 +303,6 @@ public class Acao {
 		
 		JComboBox<String> cbxAlbum = Manager.getAlbumBox();
 		cbxAlbum.setBounds(0, 80, 215, 25);
-		
-		//Centraliza os items da caixa
-		((JLabel) cbxAlbum.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		
 		frmAddMusica.add(lblNome);
 		frmAddMusica.add(lblGenero);
