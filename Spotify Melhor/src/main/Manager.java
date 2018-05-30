@@ -15,7 +15,8 @@ public class Manager {
 	
 	private static ArrayList<Musica> musicas = new ArrayList<>();
 	private static ArrayList<Album> albuns = new ArrayList<>();
-	private static DefaultTableModel tbTodasMusicas;
+	private static ArrayList<Playlist> playlists = new ArrayList<>();
+	public static DefaultTableModel tbTdMusicas, tbMusicasPlaylist;
 	
 	public static Musica getMusica(int index) {
 		
@@ -57,8 +58,6 @@ public class Manager {
 			combo.addItem(album.getTitulo());
 		}
 		
-		combo.addItem("Teste");
-		
 		return combo;
 	}
 	
@@ -69,14 +68,19 @@ public class Manager {
 	
 	public static JScrollPane getTbTodasMusicas() {
 		
-		tbTodasMusicas = new DefaultTableModel();
+		if (tbTdMusicas == null) {
+			
+			tbTdMusicas = new DefaultTableModel();
+			
+			//Adicionando colunas
+			tbTdMusicas.addColumn("Título");
+			tbTdMusicas.addColumn("Gênero");
+			tbTdMusicas.addColumn("Artista");
+			tbTdMusicas.addColumn("Álbum");
+			tbTdMusicas.addColumn("Duração");
+		}
 		
-		//Adicionando colunas
-		tbTodasMusicas.addColumn("Título");
-		tbTodasMusicas.addColumn("Gênero");
-		tbTodasMusicas.addColumn("Artista");
-		tbTodasMusicas.addColumn("Álbum");
-		tbTodasMusicas.addColumn("Duração");
+		atualizarTbTodasMusicas();
 		
 		JTable tabela = new JTable() {
 			
@@ -92,11 +96,9 @@ public class Manager {
 			}
 		};
 		
-		tabela.setModel(tbTodasMusicas);
+		tabela.setModel(tbTdMusicas);
 		tabela.setDefaultEditor(Object.class, null);
-		tabela.getTableHeader().setBackground(Color.WHITE);		
-		
-		tabela.getColumn("Duração").setPreferredWidth(0);
+		tabela.getTableHeader().setBackground(Color.WHITE);
 		
 		JScrollPane scroll = new JScrollPane(tabela);
 		
@@ -105,11 +107,102 @@ public class Manager {
 	
 	private static void atualizarTbTodasMusicas() {
 		
-		tbTodasMusicas.setRowCount(0);
+		tbTdMusicas.setRowCount(0);
 		
 		for (Musica musica : musicas) {
 			
-			tbTodasMusicas.addRow(musica.getInfo());
+			tbTdMusicas.addRow(musica.getInfo());
+		}
+	}
+
+	public static JScrollPane getTbMusicasPlaylist(String playlist) {
+		
+		if (tbMusicasPlaylist == null) {
+			
+			tbMusicasPlaylist = new DefaultTableModel();
+			
+			//Adicionando colunas
+			tbMusicasPlaylist.addColumn("Título");
+			tbMusicasPlaylist.addColumn("Gênero");
+			tbMusicasPlaylist.addColumn("Artista");
+			tbMusicasPlaylist.addColumn("Álbum");
+			tbMusicasPlaylist.addColumn("Duração");
+		}
+		
+		atualizarTbMusicasPlaylist(playlist);
+		
+		JTable tabela = new JTable() {
+			
+			//Essa parte do código arruma as colunas da tabela para as informações ficarem centralizadas
+			DefaultTableCellRenderer render = new DefaultTableCellRenderer();
+			{
+				render.setHorizontalAlignment(SwingConstants.CENTER);
+			}
+			
+			@Override
+			public TableCellRenderer getCellRenderer(int arg0, int arg1) {
+				return render;
+			}
+		};
+		
+		tabela.setModel(tbMusicasPlaylist);
+		tabela.setDefaultEditor(Object.class, null);
+		tabela.getTableHeader().setBackground(Color.WHITE);
+		
+		JScrollPane scroll = new JScrollPane(tabela);
+		
+		return scroll;
+	}
+	
+	public static void atualizarTbMusicasPlaylist(String playlist) {
+		
+		tbMusicasPlaylist.setRowCount(0);
+		
+		for (Playlist plist : playlists) {
+			
+			if (plist.getNome().equals(playlist)) {
+				
+				for (Musica musica : plist.getMusicas()) {
+					
+					tbMusicasPlaylist.addRow(musica.getInfo());
+				}
+				
+				break;
+			}
+		}
+	}
+	
+	public static void filtrarTb(String filtro, DefaultTableModel tabela) {
+		
+		tabela.setRowCount(0);
+		
+		if (filtro.equals("")) {
+			
+			atualizarTbTodasMusicas();
+		} else {
+			
+			if (filtro.matches("\\d*(:\\d{0,2})?")) {
+				
+				for (Musica musica : musicas) {
+					
+					if (musica.getDuracao().contains(filtro)) {
+						
+						tabela.addRow(musica.getInfo());
+					}
+				}
+			} else {
+				
+				for (Musica musica : musicas) {
+					
+					if ((musica.getAlbum().toUpperCase().contains(filtro.toUpperCase())) ||
+						(musica.getNome().toUpperCase().contains(filtro.toUpperCase())) || 
+						(musica.getArtista().toUpperCase().contains(filtro.toUpperCase())) || 
+						(musica.getGenero().toUpperCase().contains(filtro.toUpperCase()))) {
+						
+						tabela.addRow(musica.getInfo());
+					}
+				}
+			}
 		}
 	}
 }

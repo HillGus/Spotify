@@ -2,6 +2,8 @@ package main;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -12,6 +14,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class Acao {
 	
@@ -21,8 +25,6 @@ public class Acao {
 	private int level = 1;
 		
 	public Acao() {
-		
-		addMusica();
 		
 		//Adiciona um usuário à lista de usuários
 		usuarios.add(new Object[] {"Hill", "Bill", 1});
@@ -124,6 +126,22 @@ public class Acao {
 		frmPrincipal.add(btnTdsMusicas);
 		frmPrincipal.add(btnPlaylists);
 		
+		if (level == 1) {
+			
+			JButton btnArtista = new JButton("Autorais");
+			btnArtista.setBounds(0, 50, 200, 35);
+			btnArtista.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					
+					Autorais();
+				}
+			});
+			
+			frmPrincipal.add(btnArtista);
+		}
+		
 		frmPrincipal.setVisible(true);
 	}
 	
@@ -135,6 +153,23 @@ public class Acao {
 		
 		JTextField edtPesquisa = new JTextField();
 		edtPesquisa.setBounds(0, 0, 960, 25);
+		edtPesquisa.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicas);
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicas);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {}
+		});
 		
 		JLabel lblInfoPesquisa = new JLabel("?");
 		lblInfoPesquisa.setBounds(985, 5, 15, 15);
@@ -151,6 +186,24 @@ public class Acao {
 		frmMusicas.setVisible(true);
 	}
 
+	private void Playlists() {
+		
+		Frame frmPlaylists = new Frame("Playlists");
+		frmPlaylists.setPadding(15);
+		
+		JScrollPane scrollMusicas = Manager.getTbMusicasPlaylist("");
+		scrollMusicas.setBounds(0, 40, 1000, 250);
+		
+		frmPlaylists.add(scrollMusicas);
+		
+		frmPlaylists.setVisible(true);
+	}
+	
+	private void Autorais() {
+		
+		
+	}
+	
 	private void addMusica() {
 		
 		Frame frmAddMusica = new Frame("Adicionar Música");
@@ -183,8 +236,4 @@ public class Acao {
 		frmAddMusica.setVisible(true);
 	}
 	
-	private void Playlists() {
-		
-		
-	}
 }
