@@ -31,4 +31,9 @@ public class Album {
 		
 		return this.musicas.get(index);
 	}
+	
+	public ArrayList<Musica> getMusicas() {
+		
+		return this.musicas;
+	}
 }

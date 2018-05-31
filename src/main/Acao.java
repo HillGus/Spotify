@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
@@ -24,13 +25,14 @@ public class Acao {
 	
 	// ArrayList com login e senha dos usuários
 	ArrayList<Object[]> usuarios = new ArrayList<>();
-	private String usuario;
 	private int level = 1;
 		
+	public static User user;
+	
 	public Acao() {
 		
-		//Adiciona um usuário à lista de usuários
-		usuarios.add(new Object[] {"Hill", "Bill", 1});
+		Manager.addUser("Hill", "Bill", 1);
+		Manager.addUser("Nathan", "Gay", 0);
 	}
 	
 	public void login() {
@@ -59,11 +61,12 @@ public class Acao {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				int logado = confirmarLogin(edtNome.getText(), String.valueOf(edtSenha.getPassword()));
+				User userA = Manager.getUser(edtNome.getText(), String.valueOf(edtSenha.getPassword()));
 				
-				if (logado > -1) {
+				if (userA != null) {
 					
-					level = logado;
+					user = userA;
+					level = userA.getLevel();
 					frmLogin.dispose();
 					Principal();
 				}
@@ -78,25 +81,6 @@ public class Acao {
 		
 		frmLogin.setVisible(true);
 	}
-
-	private int confirmarLogin(String usuario, String senha) {
-		
-		for (Object[] dados : usuarios) {
-			
-			String usuarioA = dados[0].toString();
-			String senhaA = dados[1].toString();
-			
-			if ((usuario.equals(usuarioA)) && (senha.equals(senhaA))) {
-				
-				this.usuario = usuario;
-				
-				//Retorna o nivel do usuario no sistema
-				return (int) dados[2];
-			}
-		}
-		
-		return -1;
-	}	
 
 	public void Principal() {
 		
@@ -131,19 +115,33 @@ public class Acao {
 		
 		if (level == 1) {
 			
-			JButton btnArtista = new JButton("Autorais");
-			btnArtista.setBounds(0, 50, 200, 35);
+			JButton btnArtista = new JButton("Artista");
+			btnArtista.setBounds(0, 100, 200, 35);
 			btnArtista.addActionListener(new ActionListener() {
 				
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					
-					Autorais();
+					Artista();
 				}
 			});
 			
 			frmPrincipal.add(btnArtista);
 		}
+		
+		JButton btnSair = new JButton("Sair");
+		btnSair.setBounds(0, level == 0 ? 100 : 150, 200, 35);
+		btnSair.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				frmPrincipal.dispose();
+				login();
+			}
+		});
+		
+		frmPrincipal.add(btnSair);
 		
 		frmPrincipal.setVisible(true);
 	}
@@ -161,13 +159,13 @@ public class Acao {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				
-				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicas);
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicas, Manager.musicas);
 			}
 			
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 
-				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicas);
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicas, Manager.musicas);
 			}
 			
 			@Override
@@ -193,6 +191,7 @@ public class Acao {
 		
 		Frame frmPlaylists = new Frame("Playlists");
 		frmPlaylists.setPadding(15);
+		frmPlaylists.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		JLabel lblPlaylists = new JLabel("Playlists");
 		lblPlaylists.setBounds(0, 5, 50, 15);
@@ -215,7 +214,12 @@ public class Acao {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
-				String titulo = JOptionPane.showInputDialog("Informe o nome da nova playlist");
+				String titulo = "";
+				
+				while (titulo.equals("")) {
+					
+					titulo = JOptionPane.showInputDialog("Informe o nome da nova playlist");
+				}
 				
 				Manager.newPlaylist(titulo);
 			}
@@ -239,13 +243,15 @@ public class Acao {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				
-				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbMusicasPlaylist);
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbMusicasPlaylist, 
+						Manager.getPlaylist((String) cbxPlaylists.getSelectedItem()).getMusicas());
 			}
 			
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 
-				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbMusicasPlaylist);
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbMusicasPlaylist, 
+						Manager.getPlaylist((String) cbxPlaylists.getSelectedItem()).getMusicas());
 			}
 			
 			@Override
@@ -262,9 +268,25 @@ public class Acao {
 		
 		JButton btnAddMusica = new JButton("Adicionar Música");
 		btnAddMusica.setBounds(0, 345, 150, 25);
+		btnAddMusica.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				addMusicaOnPlaylist();
+			}
+		});
 		
 		JButton btnRemMusica = new JButton("Remover Música");
 		btnRemMusica.setBounds(165, 345, 150, 25);
+		btnRemMusica.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				Manager.getPlaylist((String) cbxPlaylists.getSelectedItem()).remMusica(Manager.selecMusica);				
+			}
+		});
 		
 		frmPlaylists.add(btnNewPlaylist);
 		frmPlaylists.add(btnRemPlaylist);
@@ -279,9 +301,63 @@ public class Acao {
 		frmPlaylists.setVisible(true);
 	}
 	
-	private void Autorais() {
+	private void addMusicaOnPlaylist() {
 		
+		Frame frm = new Frame("Todas As Músicas");
+		frm.setPadding(15);
+		frm.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
+		JTextField edtPesquisa = new JTextField();
+		edtPesquisa.setBounds(0, 0, 205, 25);
+		edtPesquisa.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicasResumidas, Manager.musicas);
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+
+				Manager.filtrarTb(edtPesquisa.getText(), Manager.tbTdMusicasResumidas, Manager.musicas);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {}
+		});
+
+		JLabel lblInfoPesquisa = new JLabel("?");
+		lblInfoPesquisa.setBounds(220, 5, 10, 15);
+		lblInfoPesquisa.setToolTipText("<html><p>Use este campo para pesquisar suas músicas por:<br/>"
+									 + " Nome, Gênero, Artista, Album ou Duração</p></html>");
+		
+		JScrollPane scrollMusicasResumidas = Manager.getTbTodasMusicasResumida();
+		scrollMusicasResumidas.setBounds(0, 40, 240, 300);
+		
+		frm.add(edtPesquisa);
+		frm.add(lblInfoPesquisa);
+		frm.add(scrollMusicasResumidas);
+		
+		frm.setVisible(true);
+	}
+	
+	private void Artista() {
+		
+		Frame frmArtista = new Frame("Artista");
+		frmArtista.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frmArtista.setPadding(15);
+		
+		JButton btnAlbuns = new JButton("Álbuns");
+		btnAlbuns.setBounds(0, 0, 200, 35);
+		
+		JButton btnMusicas = new JButton("Músicas");
+		btnMusicas.setBounds(0, 50, 200, 35);
+		
+		frmArtista.add(btnMusicas);
+		frmArtista.add(btnAlbuns);
+		
+		frmArtista.setVisible(true);
 	}
 	
 	private void addMusica() {

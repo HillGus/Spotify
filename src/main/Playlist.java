@@ -15,6 +15,19 @@ public class Playlist {
 	public void addMusica(Musica musica) {
 		
 		musicas.add(musica);
+		Manager.atualizarTbMusicasPlaylist(nome);
+	}
+	
+	public void remMusica(Musica musica) {
+		
+		musicas.remove(musica);
+		Manager.atualizarTbMusicasPlaylist(nome);
+	}
+		
+	public void remMusica(int index) {
+		
+		musicas.remove(index);
+		Manager.atualizarTbMusicasPlaylist(nome);
 	}
 	
 	public String getNome() {

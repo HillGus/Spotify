@@ -6,7 +6,7 @@ public class Main {
 		
 		Acao acao = new Acao();
 		
-		acao.Principal();
+		acao.login();
 	}
 
 }
