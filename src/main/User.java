@@ -21,6 +21,19 @@ public class User {
 		return this.playlists;
 	}
 	
+	public Playlist getPlaylist(String titulo) {
+		
+		for (Playlist playlist : playlists) {
+			
+			if (playlist.getNome().equals(titulo)) {
+				
+				return playlist;
+			}
+		}
+		
+		return null;
+	}
+	
 	public String getNome() {
 		
 		return this.nome;

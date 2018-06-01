@@ -1,6 +1,5 @@
 package main;
 
-import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -19,17 +18,49 @@ public class Manager {
 	public static ArrayList<Musica> musicas = new ArrayList<>();
 	private static ArrayList<Musica> musicasExibidas = new ArrayList<>();
 	private static ArrayList<User> users = new ArrayList<>();
+	
 	public static DefaultTableModel tbTdMusicas, tbMusicasPlaylist, tbTdMusicasResumidas;
 	
 	private static JComboBox<String> playlistBox;
 	private static String playlistAtual;
-	
 	public static int selecMusica;
 	
-	public static User getUser(String nome, String senha) {
+	//Método utilizado para iniciar as tabelas do sistema
+	public static void iniciarTabelas() {
+		
+		//Cria tabela que guarda todas as músicas
+		tbTdMusicas = new DefaultTableModel();
+		
+		//Adicionando colunas
+		tbTdMusicas.addColumn("Título");
+		tbTdMusicas.addColumn("Gênero");
+		tbTdMusicas.addColumn("Artista");
+		tbTdMusicas.addColumn("Álbum");
+		tbTdMusicas.addColumn("Duração");
+		
+		//Cria tabela que guarda todas as músicas mas com informações a menos
+		tbTdMusicasResumidas = new DefaultTableModel();
+		
+		tbTdMusicasResumidas.addColumn("Título");
+		tbTdMusicasResumidas.addColumn("Artista");
+		
+		//Cria tabela que guarda todas as músicas de uma certa playlist
+		tbMusicasPlaylist = new DefaultTableModel();
+		
+		//Adicionando colunas
+		tbMusicasPlaylist.addColumn("Título");
+		tbMusicasPlaylist.addColumn("Gênero");
+		tbMusicasPlaylist.addColumn("Artista");
+		tbMusicasPlaylist.addColumn("Álbum");
+		tbMusicasPlaylist.addColumn("Duração");
+	}
+	
+	
+ 	public static User getUser(String nome, String senha) {
 		
 		for (User user : users) {
 			
+			//Verifica existe um usuário com os dados enviados
 			if ((user.getNome().equals(nome)) && (user.getSenha().equals(senha))) {
 				
 				return user;
@@ -41,6 +72,7 @@ public class Manager {
 	
 	public static void addUser(String nome, String senha, int level) {
 		
+		//Adiciona um usuário normal caso o nível seja 0, caso o nível seja 1 adiciona um artista
 		users.add(level == 0 ? new User(nome, senha, 0) : new Artista(nome, senha));
 	}
 	
@@ -51,69 +83,76 @@ public class Manager {
 	
 	public static void addMusica(String nome, String genero, String artista, String album, int min, int sec) {
 		
+		//Instancia nova música
 		Musica musica = new Musica(nome, genero, artista, album, min, sec);
 		
+		//Adiciona a música à lista de músicas
 		musicas.add(musica);
 		
-		//Procura o album em que a música está
-		for (Album albumA : ((Artista) Acao.user).getAlbuns()) {
-			
-			String titulo = albumA.getTitulo();
-			
-			if (titulo.equals(album)) {
-				
-				albumA.addMusica(musica);
-			}
-		}
+		//Adiciona a música ao álbum do artista
+		((Artista) Acao.user).addMusica(musica, album);
 		
+		//Atualiza a tabela de músicas
 		atualizarTbTodasMusicas();
 	}
-	
-	public static Album getAlbum(int index) {
+
+	public static void remMusica(Musica musica) {
 		
-		return ((Artista) Acao.user).getAlbuns().get(index);
+		//Remove a música da lista de músicas
+		musicas.remove(musica);
+		
+		//Remove a música de todas as playlists dos usuários
+		for (User user : users) {
+			
+			for (Playlist playlist : user.getPlaylists()) {
+				
+				playlist.remMusica(musica);
+			}
+		}
 	}
 	
 	public static JComboBox<String> getAlbumBox() {
 		
+		//Cria o combo box
 		JComboBox<String> combo = new JComboBox<>();
+		
+		//Centraliza o texto dentro do combo
 		((JLabel) combo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		
 		combo.addItem("Álbum");
 		
+		//Adiciona os títulos dos álbuns do artista
 		for (Album album : ((Artista) Acao.user).getAlbuns()) {
 			
 			combo.addItem(album.getTitulo());
 		}
 		
+		//Retorna o combo box
 		return combo;
 	}
 	
 	public static JComboBox<String> getPlaylistBox() {
 		
+		//Verifica se o combo box já foi instanciado
 		if (playlistBox == null) {
 			
+			//Instancia o combo box
 			playlistBox = new JComboBox<>();
+			
+			//Centraliza o texto dentro do combo
 			((JLabel) playlistBox.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		}
 		
-		playlistBox.removeAllItems();	
+		//Atualiza o combo com as playlists do usuário
+		atualizarPlaylistBox();
 		
-		for (Playlist playlist : Acao.user.getPlaylists()) {
-			
-			playlistBox.addItem(playlist.getNome());
-		}
-		
+		//Retorna o combo
 		return playlistBox;
 	}
 	
-	public static void newAlbum(String titulo) {
-		
-		((Artista) Acao.user).getAlbuns().add(new Album(titulo));
-	}	
-	
 	public static Playlist getPlaylist(String titulo) {
 		
+		//Retorna a playlist com o título escolhido
 		for (Playlist playlist : Acao.user.getPlaylists()) {
 			
 			if (playlist.getNome().equals(titulo)) {
@@ -127,59 +166,49 @@ public class Manager {
 	
 	public static void newPlaylist(String titulo) {
 		
+		//Adiciona uma nova playlist com o título enviado à lista de playlists
 		Acao.user.getPlaylists().add(new Playlist(titulo));
 		
+		//Atualiza o combo box de playlists
 		atualizarPlaylistBox();
 	}
 	
-	public static void removePlaylist(String titulo) {
+	public static void removePlaylist(String titulo) {	
 		
-		for (int i = 0; i < Acao.user.getPlaylists().size(); i++) {
-			
-			Playlist playlist = Acao.user.getPlaylists().get(i);
-			
-			if (playlist.getNome().equals(titulo)) {
-				
-				Acao.user.getPlaylists().remove(playlist);
-			}
-		}
+		//Remove a playlist com o título enviado da lista de playlists do usuário
+		Acao.user.getPlaylists().remove(Acao.user.getPlaylist(titulo));
 		
+		//Atualiza o combo box de playlists
 		atualizarPlaylistBox();
 	}
 	
 	private static void atualizarPlaylistBox() {
 		
+		//Remove os itens do combo
 		playlistBox.removeAllItems();
 		
+		//Adiciona os títulos das playlists do usuário
 		for (Playlist playlist : Acao.user.getPlaylists()) {
 			
 			playlistBox.addItem(playlist.getNome());
 		}
 		
+		//Seleciona a última playlist
 		playlistBox.setSelectedIndex(Acao.user.getPlaylists().size() - 1);
 		
+		//Atualiza a tabela de músicas da playlist de acordo com a playlist selecionada
 		atualizarTbMusicasPlaylist((String) playlistBox.getSelectedItem());
 	}
 	
 	public static JScrollPane getTbTodasMusicas() {
-		
-		if (tbTdMusicas == null) {
-			
-			tbTdMusicas = new DefaultTableModel();
-			
-			//Adicionando colunas
-			tbTdMusicas.addColumn("Título");
-			tbTdMusicas.addColumn("Gênero");
-			tbTdMusicas.addColumn("Artista");
-			tbTdMusicas.addColumn("Álbum");
-			tbTdMusicas.addColumn("Duração");
-		}
-		
+
+		//Atualiza a tabela de músicas
 		atualizarTbTodasMusicas();
 		
+		//Cria JTable
 		JTable tabela = new JTable() {
 			
-			//Essa parte do código arruma as colunas da tabela para as informações ficarem centralizadas
+			//Centraliza as informações das colunas
 			DefaultTableCellRenderer render = new DefaultTableCellRenderer();
 			{
 				render.setHorizontalAlignment(SwingConstants.CENTER);
@@ -191,30 +220,26 @@ public class Manager {
 			}
 		};
 		
+		//Configura a tabela
 		tabela.setModel(tbTdMusicas);
 		tabela.setDefaultEditor(Object.class, null);
 		
+		//Cria um JScrollPane com a tabela
 		JScrollPane scroll = new JScrollPane(tabela);
-		
+
+		//Retorna o scroll
 		return scroll;
 	}
 	
 	public static JScrollPane getTbTodasMusicasResumida() {
 		
-		if (tbTdMusicasResumidas == null) {
-			
-			tbTdMusicasResumidas = new DefaultTableModel();
-			
-			tbTdMusicasResumidas.addColumn("Título");
-			tbTdMusicasResumidas.addColumn("Artista");
-			
-		}
-		
+		//Atualiza a tabela de músicas resumidas
 		atualizarTbTodasMusicasResumidas();
 		
+		//Cria JTable
 		JTable tabela = new JTable() {
 			
-			//Essa parte do código arruma as colunas da tabela para as informações ficarem centralizadas
+			//Centralizaas informações das colunas
 			DefaultTableCellRenderer render = new DefaultTableCellRenderer();
 			{
 				render.setHorizontalAlignment(SwingConstants.CENTER);
@@ -226,10 +251,11 @@ public class Manager {
 			}
 		};
 		
+		//Configura a tabela
 		tabela.setModel(tbTdMusicasResumidas);
 		tabela.setDefaultEditor(Object.class, null);
-		tabela.getTableHeader().setBackground(Color.WHITE);
 		
+		//Adiciona um listener para quando
 		tabela.addMouseListener(new MouseListener() {
 			
 			@Override
@@ -281,18 +307,6 @@ public class Manager {
 	
 	public static JScrollPane getTbMusicasPlaylist(String playlist) {
 		
-		if (tbMusicasPlaylist == null) {
-			
-			tbMusicasPlaylist = new DefaultTableModel();
-			
-			//Adicionando colunas
-			tbMusicasPlaylist.addColumn("Título");
-			tbMusicasPlaylist.addColumn("Gênero");
-			tbMusicasPlaylist.addColumn("Artista");
-			tbMusicasPlaylist.addColumn("Álbum");
-			tbMusicasPlaylist.addColumn("Duração");
-		}
-		
 		playlistAtual = playlist;
 		atualizarTbMusicasPlaylist(playlist);
 		
@@ -312,7 +326,6 @@ public class Manager {
 		
 		tabela.setModel(tbMusicasPlaylist);
 		tabela.setDefaultEditor(Object.class, null);
-		tabela.getTableHeader().setBackground(Color.WHITE);
 		
 		tabela.addMouseListener(new MouseListener() {
 			
@@ -391,7 +404,13 @@ public class Manager {
 						
 						musicasExibidas.add(musica);
 						
-						tabela.addRow(musica.getInfo());
+						if (tabela.getColumnCount() == 2) {
+							
+							tabela.addRow(new Object[] {musica.getNome(), musica.getArtista()});
+						} else {
+							
+							tabela.addRow(musica.getInfo());
+						}
 					}
 				}
 			}

@@ -15,15 +15,19 @@ public class Frame extends JFrame {
 	
 	private int padding = 0, width = 0, height = 0;
 	
+	//Construtor simples
 	public Frame() {
 		
 		this("");
 	}
 	
+	//Construtor com título
 	public Frame(String titulo) {
 		
+		//Cria um JFrame
 		super(titulo);
 		
+		//Configura o JFrame
 		setLayout(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}

@@ -20,7 +20,14 @@ public class Playlist {
 	
 	public void remMusica(Musica musica) {
 		
-		musicas.remove(musica);
+		for (int i = 0; i < musicas.size(); i++) {
+			
+			if (musicas.get(i) == musica) {
+				
+				musicas.remove(i);
+				i--;
+			}
+		}
 		Manager.atualizarTbMusicasPlaylist(nome);
 	}
 		

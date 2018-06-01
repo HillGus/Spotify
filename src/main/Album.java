@@ -27,6 +27,11 @@ public class Album {
 		this.musicas.add(musica);
 	}
 	
+	public void remMusica(Musica musica) {
+		
+		this.musicas.remove(musica);
+	}
+	
 	public Musica getMusica(int index) {
 		
 		return this.musicas.get(index);
