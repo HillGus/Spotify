@@ -15,13 +15,11 @@ public class Frame extends JFrame {
 	
 	private int padding = 0, width = 0, height = 0;
 	
-	//Construtor simples
 	public Frame() {
 		
 		this("");
 	}
 	
-	//Construtor com título
 	public Frame(String titulo) {
 		
 		//Cria um JFrame
@@ -32,6 +30,7 @@ public class Frame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
+	//Define a margem interna do frame
 	public void setPadding(int padding) {
 		
 		this.padding = padding;
@@ -43,11 +42,13 @@ public class Frame extends JFrame {
 		this.width = width;
 		this.height = height;
 		
+		//Define a dimensão do frame do tamanho que o pane interno fique com os parâmetros informados
 		super.setSize(width + 16, height + 39);
 	}
 	
 	public void setVisible(boolean visivel) {
 		
+		//Adiciona a margem interna ao frame
 		this.setSize(width + padding * 2, height + padding * 2);
 		
 		super.setVisible(visivel);
@@ -59,8 +60,10 @@ public class Frame extends JFrame {
 		
 		resizeIfNeeded(comp);
 		
+		//Obtem x e y do componente
 		int x = (int) comp.getLocation().getX(), y = (int) comp.getLocation().getY();
 		
+		//define a localização do componente de acordo com a margem interna
 		comp.setLocation((int)x + padding, (int)y + padding);
 		
 		super.add(comp);
@@ -68,13 +71,16 @@ public class Frame extends JFrame {
 	
 	public void add(JComponent comp, String key) {
 		
+		//Adiciona o componente no dicionário e no array
 		componentes.put(key, comp);
 		arrayComponentes.add(comp);
 		
 		resizeIfNeeded(comp);
 		
+		//Obtem x e y do componente
 		int x = (int) comp.getLocation().getX(), y = (int) comp.getLocation().getY();
 		
+		//Define a localização do componente de acordo com a margem interna
 		comp.setLocation((int)x + padding, (int)y + padding);
 		
 		add(comp);
@@ -87,8 +93,10 @@ public class Frame extends JFrame {
 	
 	public <T> ArrayList<T> get(Class<T> classe) {
 		
+		//Cria um arrayList da classe informada
 		ArrayList<T> comps = new ArrayList<>();
 		
+		//Adiciona os componentes que forem daquela classe ao arraylist
 		for (JComponent comp : arrayComponentes) {
 			
 			try {
@@ -106,6 +114,7 @@ public class Frame extends JFrame {
 		int width = (int) comp.getSize().getWidth();
 		int height = (int) comp.getSize().getHeight();
 		
+		//Aumenta o tamanho do Frame caso ele não seja grande o suficiente para os componentes
 		this.width = this.width < x + width ? x + width : this.width;
 		this.height = this.height < y + height ? y + height : this.height;
 	}

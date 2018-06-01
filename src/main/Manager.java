@@ -23,7 +23,6 @@ public class Manager {
 	
 	private static JComboBox<String> playlistBox;
 	private static String playlistAtual;
-	public static int selecMusica;
 	
 	//Método utilizado para iniciar as tabelas do sistema
 	public static void iniciarTabelas() {
@@ -255,7 +254,7 @@ public class Manager {
 		tabela.setModel(tbTdMusicasResumidas);
 		tabela.setDefaultEditor(Object.class, null);
 		
-		//Adiciona um listener para quando
+		//Adiciona um listener para quando o usuário clickar 2 vezes ou mais adicionar a música selecionada à playlist
 		tabela.addMouseListener(new MouseListener() {
 			
 			@Override
@@ -276,16 +275,20 @@ public class Manager {
 			}
 		});
 		
+		//Cria um JScrollPane com a tabela
 		JScrollPane scroll = new JScrollPane(tabela);
 		
+		//Retorna o scroll
 		return scroll;
 	}
 	
 	private static void atualizarTbTodasMusicas() {
 		
+		//Limpa a tabela e a lista de músicas exibidas
 		tbTdMusicas.setRowCount(0);
 		musicasExibidas.clear();
 		
+		//Adiciona todas as músicas à lista e à tabela
 		for (Musica musica : musicas) {
 			
 			musicasExibidas.add(musica);
@@ -295,9 +298,11 @@ public class Manager {
 
 	private static void atualizarTbTodasMusicasResumidas() {
 		
+		//Limpa a tabela e a lista de músicas resumidas
 		tbTdMusicasResumidas.setRowCount(0);
 		musicasExibidas.clear();
 		
+		//Adiciona todas as músicas à lista de músicas resumidas e à tabela
 		for (Musica musica : musicas) {
 			
 			musicasExibidas.add(musica);
@@ -307,12 +312,16 @@ public class Manager {
 	
 	public static JScrollPane getTbMusicasPlaylist(String playlist) {
 		
+		//Define a playlist atual como a playlist enviada
 		playlistAtual = playlist;
+		
+		//Atualiza a tabela de músicas da playlist
 		atualizarTbMusicasPlaylist(playlist);
 		
+		//Cria um JTable
 		JTable tabela = new JTable() {
 			
-			//Essa parte do código arruma as colunas da tabela para as informações ficarem centralizadas
+			//Centraliza as informações das colunas
 			DefaultTableCellRenderer render = new DefaultTableCellRenderer();
 			{
 				render.setHorizontalAlignment(SwingConstants.CENTER);
@@ -324,37 +333,24 @@ public class Manager {
 			}
 		};
 		
+		//Configura tabela
 		tabela.setModel(tbMusicasPlaylist);
 		tabela.setDefaultEditor(Object.class, null);
-		
-		tabela.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseReleased(MouseEvent e) {}	
-			@Override
-			public void mousePressed(MouseEvent e) {
-				
-				selecMusica = tabela.getSelectedRow();
-			}
-			
-			@Override
-			public void mouseExited(MouseEvent e) {}
-			@Override
-			public void mouseEntered(MouseEvent e) {}		
-			@Override
-			public void mouseClicked(MouseEvent e) {}
-		});
-		
+
+		//Cria um JScrollPane com a tabela
 		JScrollPane scroll = new JScrollPane(tabela);
 		
+		//Retorna o scroll
 		return scroll;
 	}
 	
 	public static void atualizarTbMusicasPlaylist(String playlist) {
 		
+		//Limpa a tabela e a lista de músicas exibidas
 		tbMusicasPlaylist.setRowCount(0);
 		musicasExibidas.clear();
 		
+		//Adiciona as músicas da playlist enviada à tabela e à lista de músicas exibidas
 		for (Playlist plist : Acao.user.getPlaylists()) {
 			
 			if (plist.getNome().equals(playlist)) {
@@ -374,9 +370,11 @@ public class Manager {
 	
 	public static void filtrarTb(String filtro, DefaultTableModel tabela, ArrayList<Musica> musicas) {
 		
+		//Limpa a tabela e a lista de músicas exibidas
 		tabela.setRowCount(0);
 		musicasExibidas.clear();
 		
+		//Caso o filtro seja nulo atualiza as tabelas
 		if (filtro.equals("")) {
 			
 			atualizarTbTodasMusicas();
@@ -384,6 +382,7 @@ public class Manager {
 			atualizarTbMusicasPlaylist(playlistAtual);
 		} else {
 			
+			//Filtra a tabela por data
 			if (filtro.matches("\\d*(:\\d{0,2})?")) {
 				
 				for (Musica musica : musicas) {
@@ -395,6 +394,7 @@ public class Manager {
 				}
 			} else {
 				
+				//Filtra se o album, título, artista ou genero começarem com o que estiver no filtro
 				for (Musica musica : musicas) {
 					
 					if ((musica.getAlbum().toUpperCase().startsWith(filtro.toUpperCase())) ||
@@ -404,11 +404,13 @@ public class Manager {
 						
 						musicasExibidas.add(musica);
 						
+						//Caso a tabela seja resumida adiciona apenas nome e artista
 						if (tabela.getColumnCount() == 2) {
 							
 							tabela.addRow(new Object[] {musica.getNome(), musica.getArtista()});
 						} else {
 							
+							//Adiciona todas as informações
 							tabela.addRow(musica.getInfo());
 						}
 					}

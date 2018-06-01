@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -335,8 +336,11 @@ public class Acao {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
+				//Obtendo JTable
+				JTable tabela = ((JTable) scrollMusicas.getViewport().getView());
+				
 				//removendo música selecionada da playlist selecionada
-				Manager.getPlaylist((String) cbxPlaylists.getSelectedItem()).remMusica(Manager.selecMusica);				
+				Manager.getPlaylist((String) cbxPlaylists.getSelectedItem()).remMusica(tabela.getSelectedRow());				
 			}
 		});
 		

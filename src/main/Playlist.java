@@ -20,6 +20,7 @@ public class Playlist {
 	
 	public void remMusica(Musica musica) {
 		
+		//Remove todas as aparições da música nessa playlist
 		for (int i = 0; i < musicas.size(); i++) {
 			
 			if (musicas.get(i) == musica) {

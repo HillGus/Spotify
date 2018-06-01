@@ -23,6 +23,7 @@ public class User {
 	
 	public Playlist getPlaylist(String titulo) {
 		
+		//Retorna a playlist com título enviado
 		for (Playlist playlist : playlists) {
 			
 			if (playlist.getNome().equals(titulo)) {

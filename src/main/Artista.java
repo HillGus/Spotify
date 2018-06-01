@@ -24,15 +24,18 @@ public class Artista extends User {
 		
 		super(nome, senha, 1);
 		
+		//Inicia o combo box de álbuns
 		albunsBox = new JComboBox<>();
 		((JLabel) albunsBox.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		
+		//Inicia o modelo da tabela de músicas
 		musicasModel = new DefaultTableModel();
 		
 		musicasModel.addColumn("Título");
 		musicasModel.addColumn("Álbum");
 		musicasModel.addColumn("Duração");
 		
+		//Inicia o modelo da tabela de álbuns
 		musicasAlbumModel = new DefaultTableModel();
 		musicasAlbumModel.addColumn("Título");
 		musicasAlbumModel.addColumn("Duração");

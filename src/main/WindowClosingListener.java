@@ -18,9 +18,10 @@ public class WindowClosingListener implements WindowListener {
 		
 	}
 
+	//Só esse é utilizado
 	@Override
 	public void windowClosed(WindowEvent e) {
-		// TODO Auto-generated method stub
+		
 		frm.setVisible(true);
 	}
 
