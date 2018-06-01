@@ -98,6 +98,8 @@ public class Acao {
 		frmLogin.add(edtSenha);
 		frmLogin.add(btnLogar);
 		
+		frmLogin.getRootPane().setDefaultButton(btnLogar);
+		
 		frmLogin.setVisible(true);
 		
 		//Retornando frame
@@ -592,6 +594,8 @@ public class Acao {
 		frmAddMusica.add(edtGenero);
 		frmAddMusica.add(edtDuracao);
 		frmAddMusica.add(cbxAlbum);
+		
+		frmAddMusica.getRootPane().setDefaultButton(btnAdicionar);
 		
 		//Retornando frame
 		return frmAddMusica;
